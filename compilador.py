@@ -177,3 +177,97 @@ class Compilador:
 
         if compilacion_correcta == 0:
             print("Compilacion exitosa")
+
+
+    def valorTipoCorrecto(self,elemento):
+        if (elemento.getTipoDato() == "" and elemento.getIdentificador() == "" and elemento.getValor() == "") or \
+            elemento.getIdentificador() == "return" or elemento.getTipoDato() == "void" or \
+            (elemento.getIdentificador()[0] == 'i' and elemento.getIdentificador()[1] == 'f') or \
+            (elemento.getIdentificador()[0] == 'w' and elemento.getIdentificador()[1] == 'h'):
+            return True
+
+        if elemento.getIdentificador() != "":
+            if elemento.getTipoDato() == "": # no tiene tipo de dato
+                if self.verificaLlave(elemento): # existe la llave
+                    if self.esNumero(elemento.getValor()): # es número y es acorde
+                        key = elemento.getIdentificador() # Ej: x=5;
+                        ele = self.buscaElementoHash(key)
+
+                        if ele.getTipoDato() == "int" or ele.getTipoDato() == "float":
+                            elemento.setTipoDato(ele.getTipoDato())
+                            self.hashtableElemento.pop(key)
+                            registro = (key, elemento)
+                            self.hashtableElemento.append(registro)
+                            self.keyElemento.append(ele.getIdentificador())
+                            return True
+                        else:
+                            print(f"Error-- Linea {self.numLinea}: el identificador '{elemento.getIdentificador()}' no coincide con el valor de asignación.")
+                            return False
+                    else: # llave declarada y sin tipo de dato
+                        key = elemento.getIdentificador() # Ej: x=5;
+                        ele = self.buscaElementoHash(key)
+
+                        if elemento.getValor()[0] == '"' and elemento.getValor()[-1] == '"' and ele.getTipoDato() == "string":
+                            # es cadena y es acorde
+                            key = elemento.getIdentificador()
+                            ele = self.buscaElementoHash(key)
+                            elemento.setTipoDato(ele.getTipoDato()) # Ej: cadena = "hola";
+                            self.hashtableElemento.pop(key)
+                            registro = (key, elemento)
+                            self.hashtableElemento.append(registro)
+                            self.keyElemento.append(elemento.getIdentificador())
+                            return True
+                        else:
+                            print(f"Error-- Linea {self.numLinea}: el identificador '{elemento.getIdentificador()}' no coincide con el valor de asignación.")
+                            return False
+                else:
+                    print(f"Error-- Linea {self.numLinea}: '{elemento.getIdentificador()}' no está declarado.")
+                    return False
+            else: # Tiene tipo de dato
+                if self.verificaLlave(elemento): # Si existe
+                    print(f"Error-- Linea {self.numLinea}: doble declaración de variable.")
+                    return False # doble declaración, mal hecho
+                    # int x;
+                    # int x; || string x;
+                else: # No existe la key
+                    if elemento.getValor() == "": # No tiene valor
+                        key = elemento.getIdentificador()
+                        registro = (key, elemento)
+                        self.hashtableElemento.append(registro)
+                        self.keyElemento.append(elemento.getIdentificador())
+                        return True
+                    else: # Si tiene valor
+                        if self.esNumero(elemento.getValor()) and (elemento.getTipoDato() == "int" or elemento.getTipoDato() == "float"):
+                            # es número y es acorde
+                            # int x = 5;
+                            key = elemento.getIdentificador()
+
+                            # ele = buscaElementoHash(key)
+                            # elemento.setTipoDato(ele.getTipoDato())
+
+                            self.hashtableElemento.pop(key)
+                            registro = (key, elemento)
+                            self.hashtableElemento.append(registro)
+                            self.keyElemento.append(elemento.getIdentificador())
+                            return True
+                        else:
+                            if elemento.getValor()[0] == '"' and elemento.getValor()[-1] == '"' and elemento.getTipoDato() == "string":
+                                # declaración y definición correcta
+                                key = elemento.getIdentificador()
+                                ele = self.buscaElementoHash(key)
+                                elemento.setTipoDato(ele.getTipoDato())
+
+                                self.hashtableElemento.pop(key) # Ej: string cadena = "hola";
+                                registro = (key, elemento)
+                                self.hashtableElemento.append(registro)
+                                self.keyElemento.append(elemento.getIdentificador())
+                                return True
+                            else:
+                                print(f"Error-- Linea {self.numLinea}: el identificador '{elemento.getIdentificador()}' no coincide con el valor de asignación.")
+                                return False
+        print(f"Error-- Linea {self.numLinea}: se esperaba identificador")
+        return False
+
+
+comp=Compilador()
+comp.text_reader()
