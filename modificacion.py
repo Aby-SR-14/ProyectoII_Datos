@@ -6,11 +6,6 @@ class Analisador:
         self.tablahash_dato = {}
         self.tipos={"tipo":["int", "string", "float","void"],"cuerpo":["while", "if"]}
         self.numero_linea=0
-
-    def es_numero(self,valor):
-        if valor.isdigit():
-            return int(valor)
-        else: return 0
     
     def leer_codigo(self):
         with open("numero.txt") as archivo:
@@ -27,11 +22,9 @@ class Analisador:
     def verificar_dato(self, palabra_actual):
         if palabra_actual in self.tipos["tipo"]:
             print("tipo de dato")
-            dato.set_tipoDato(palabra_actual)
             return 1
         elif palabra_actual in self.tipos["cuerpo"]:
-            print ("cuerpo")
-            dato.set_tipoDato(palabra_actual)   
+            print ("cuerpo")  
             return 2 
         else: return -1 
     def dato_almacenado (self, key):
@@ -39,15 +32,45 @@ class Analisador:
             return 1
         else:
             return 0
-    def editar_valor(self, key, valor):
-        if self.dato_almacenado(key) >0:
-            self.tablahash_dato[key]={valor}
-            return 1
+    def retornar_valor(self, key, dato):
+        if key in self.tablahash_dato:
+            dato.set_tipo(self.tablahash_dato[key]["Tipo"])
+            dato.set_valor(self.tablahash_dato[key]["Valor"])
+            dato.set_identificador(key)
+            return dato
         else:
-            return -1
+            return None
+    def verificar_valor_valido(self, dato, palabra_actual):
+        if dato.get_tipoDato() == self.tablahash_dato[dato.get_identificador()]["Tipo"]:
+            if self.tablahash_dato[dato.get_identificador()]["Tipo"] == "int":
+                try:
+                    entero = int(palabra_actual)
+                    self.tablahash_dato[dato.get_identificador()]["Tipo"]={entero}
+                    return 1
+                except ValueError:
+                    print("ERROR")
+                    return -1
+            elif self.tablahash_dato[dato.get_identificador()]["Tipo"] == "string":
+                    try:
+                        if isinstance(palabra_actual,str):
+                            dato.set_valor(palabra_actual)
+                            self.tablahash_dato[dato.get_identificador()]["Tipo"]={palabra_actual}
+                            return 1
+                    except ValueError:
+                        print ("No es un string")
+                        return -1
+            elif self.tablahash_dato[dato.get_identificador()]["Tipo"] == "float":
+                    try:
+                            # Intenta convertir la cadena a un número de punto flotante
+                        flotante = float(palabra_actual)
+                        self.tablahash_dato[dato.get_identificador()]["Tipo"]={flotante}
+                        return 1
+                    except ValueError:
+                        print("ERROR FLOAT")
+                        return -1
+        return -1
 
-
-
+contador = 0
 analisis = Analisador()
 #analisis.leer_codigo()
 valor = False
@@ -64,13 +87,16 @@ with open("numero.txt") as archivo:
             #iteramos según la cantidad de palabras almacenadas
             while i in range(len (palabras)):
                 palabra_actual = palabras[i]
-                if palabra_actual in analisis.tablahash_dato :
-                    print("Es un dato guardado")
+                if analisis.dato_almacenado(palabra_actual) > 0 :
+                    #Si es un dato almacenado hay que setear el dato por si se llega a actualizar el valor de la variable
+                    dato.set_identificador(palabra_actual)
+                    dato= dato(analisis.retornar_valor(palabra_actual) )
                     i+=1
                 elif analisis.verificar_dato(palabra_actual) > 0:
                     dato.set_tipoDato(palabra_actual)
                     i=+1
                 elif palabra_actual is "=":
+                     #Si es = es porque se le asigna un valor a la variable, para eso la bandera
                      i+=1
                      valor = True
                 elif palabra_actual is not "=" and valor is False:
@@ -80,42 +106,25 @@ with open("numero.txt") as archivo:
                     dato.set_identificador(palabra_actual)
                     if dato.get_tipoDato() == 'int':
                         dato.set_valor(0)
-                        analisis.tablahash_dato[dato.identificador]:{dato.get_valor}
+                        analisis.tablahash_dato[dato.get_identificador()]={"Tipo":dato.get_tipoDato(), "Valor":dato.get_valor()}
                         i+=1
                     elif dato.get_tipoDato() == "string":
                         dato.set_valor("")
-                        analisis.tablahash_dato[dato.identificador]:{dato.get_valor}
+                        analisis.tablahash_dato[dato.get_identificador()]={"Tipo":dato.get_tipoDato(), "Valor":dato.get_valor()}
                         i+=1
                     elif dato.get_tipoDato() == "float":
                         dato.set_valor(0.0)
-                        analisis.tablahash_dato[dato.identificador]:{dato.get_valor}
+                        analisis.tablahash_dato[dato.get_identificador()]={"Tipo":dato.get_tipoDato(), "Valor":dato.get_valor()}
                         i+=1
                     elif dato.get_tipoDato() == "void" or "while" or "if":
                         dato.set_valor("")
                         dato.set_parametros("")
                         i+=1       
-                elif valor is True:
-                    if dato.get_tipoDato() == 'int':
-                        try:
-                            entero = int(palabra_actual)
-                            dato.set_valor(entero)
-                            i+=1
-                        except ValueError:
-                            print("ERROR")
-                    elif dato.get_tipoDato() == "string":
-                        try:
-                            if isinstance(palabra_actual,str):
-                                dato.set_valor(palabra_actual)
-                                i+=1
-                        except ValueError:
-                            print ("No es un string")
-                    elif dato.get_tipoDato() == "float":
-                        try:
-                        # Intenta convertir la cadena a un número de punto flotante
-                            flotante = float(palabra_actual)
-                            dato.set_valor(palabra_actual)
-                            i+=1
-                        except ValueError:
-                            print("ERROR FLOAT")
+                elif valor is True and analisis.verificar_dato(palabra_actual)<0:
+                    if analisis.verificar_valor_valido(dato, palabra_actual)>0:
+                        valor = false
+                        i+=1
+                    else:
+                        print("Error en la linea {}, el valor no coincide con el tipo de la variable".format(contador))
 
                     
