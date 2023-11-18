@@ -1,11 +1,10 @@
-int x = 9;
-string Prueba (string p, int v)
+ x = 40;
+int funcion (float v, string n)
 {
-	while(x>8)
+	if(v>0.0)
 	{
-	int r = 6;
+	n = "Mayor";
+	x = x + 5
 	}
-	p = "hola";
-	x = 89;
-	return p;
+	return n;
 }
