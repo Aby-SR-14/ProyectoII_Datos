@@ -1,6 +1,0 @@
-int calculo (int x, int y){
-    X = 5
-    y = 2
-    n = x + y
-    return 
-}

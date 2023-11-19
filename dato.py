@@ -1,3 +1,8 @@
+"""
+Elias Campos Artavia
+Dilanna Cordoba Campos
+Abigail Salas Ramírez
+"""
 class Dato:
     """Esta clase representa un elemento en el compilador."""
 
@@ -7,11 +12,11 @@ class Dato:
         cotiene los siguientes parámetros:
         - valor, tipo(str): El valor del elemento.
         - tipoDato, tipo(str): El tipo de dato del elemento.
-        - identificador, tipo(str): El identificador del elemento.
+        - key, tipo(str): La llave del elemento.
         """
-    def __init__(self, valor,tipoDato, identificador):
+    def __init__(self, valor,tipoDato, key):
         self.valor = valor
-        self.identificador = identificador
+        self.key = key
         self.tipoDato = tipoDato
         self.parametros = None
 
@@ -30,18 +35,18 @@ class Dato:
         return self.valor
 
     """
-        Establece el Tipo de Datp del elemento.
-        - identificador,tipo (str): El nuevo identificador del elemento.
+        Establece el Tipo de Dato del elemento.
+        - key,tipo (str): La nueva llave del elemento.
         """
-    def set_identificador(self, identificador):
-        self.identificador = identificador
+    def set_key(self, key):
+        self.key = key
 
     """
         Obtiene el identificador del elemento.
         - retorna identificador,tipo (str): El identificador del elemento.
         """
-    def get_identificador(self):
-        return self.identificador
+    def get_key(self):
+        return self.key
     
     """
         Establece el valor del elemento.
@@ -71,7 +76,7 @@ class Dato:
 
     def __str__(self):
         resultado = "Tipo de Dato: {}\n".format(self.tipoDato)
-        resultado += "Identificador: {}\n".format(self.identificador)
+        resultado += "Llave: {}\n".format(self.key)
         resultado += "Valor: {}\n".format(self.valor)
 
         if self.parametros:

@@ -1,6 +1,12 @@
 from typing import List
 from collections import defaultdict
 from dato import Dato
+"""
+II Proyecto Programado: Analizador semántico
+Elias Campos Artavia
+Dilanna Cordoba Campos
+Abigail Salas Ramírez
+"""
 
 class Compilador:
 
@@ -8,29 +14,29 @@ class Compilador:
         Se inicializa el objeto Compilador.
 
         Atributos:
-        - hashtable_elemento (dict): Diccionario para almacenar elementos por key.
-        - key_elemento (list): Lista de llaves de elementos.
+        - tabla_hash_dato (dict): Diccionario para almacenar datos por key.
+        - key_dato (list): Lista de llaves de datos.
         - parametros (list): Lista de parámetros de funciones.
         - num_linea (int): Contador de líneas procesadas.
         """
     def __init__(self):
-        self.hashtable_elemento = {}
-        self.key_elemento = []
+        self.tabla_hash_dato = {}
+        self.key_dato = []
         self.parametros = []
         self.num_linea = 0
 
     """
-        Verifica si un elemento ya está presente en la lista de keys (key_elemento).
+        Verifica si un dato ya está presente en la lista de keys (key_dato).
 
         Parámetros:
-        - elemento (Dato): El elemento a verificar.
+        - dato (Dato): El dato a verificar.
 
         Retorna:
-        - bool: True si el elemento está presente, False de lo contrario.
+        - bool: True si el dato está presente, False de lo contrario.
         """
-    def verifica_llave(self, elemento):
-        for v in self.key_elemento:
-            if elemento.get_identificador() == v:
+    def verifica_llave(self, dato):
+        for v in self.key_dato:
+            if dato.get_key() == v:
                 return True
         return False
 
@@ -68,18 +74,18 @@ class Compilador:
         return False
 
     """
-        Busca un elemento en el diccionario hashtable_elemento por su key.
+        Busca un dato en el diccionario tabla_hash_dato por su key.
 
         Parámetros:
-        - key (str): La key del elemento a buscar.
+        - key (str): La key del dato a buscar.
 
         Retorna:
-        - la key y el valor del elemento encontrado, o None si no se encuentra.
+        - la key y el valor del dato encontrado, o None si no se encuentra.
         """
-    def busca_elemento_hash(self, key):
-        for registro in self.hashtable_elemento.items():
-            if registro[1].get_identificador() == key:
-                return registro
+    def buscar_dato_tablaHash(self, key):
+        for dato in self.tabla_hash_dato.items():
+            if dato[1].get_key() == key:
+                return dato
 
     """
         Verifica si una variable de retorno coincide con la declaración de la función.
@@ -91,51 +97,60 @@ class Compilador:
         Retorna:
         - bool: True si la variable de retorno coincide con la declaración de la función, False si no es asi.
         """
-    def verifica_return(self, ret, nom_funcion):
-        bandera_ret = False
-        bandera_fun = False
+    def verifica_return(self, retorno, nom_funcion):
+        validacion_return = False
+        validacion_funcion = False
 
-        for key in self.key_elemento:
-            if key == ret:
-                bandera_ret = True
+        for key in self.key_dato:
+            if key == retorno:
+                validacion_return = True
             if key == nom_funcion:
-                bandera_fun = True
+                validacion_funcion = True
 
-        if bandera_fun and bandera_ret:
-            if self.hashtable_elemento[ret].get_tipoDato() == self.hashtable_elemento[nom_funcion].get_tipoDato():
+        if validacion_funcion and validacion_return:
+            if self.tabla_hash_dato[retorno].get_tipoDato() == self.tabla_hash_dato[nom_funcion].get_tipoDato():
                 return True
 
         return False
 
     """
         Realiza la lectura y análisis del archivo de texto , procesando línea por línea.
-        Analiza las palabras en cada línea para identificar elementos como variables, funciones, tipos de datos
+        Analiza las palabras en cada línea para identificar datos como variables, funciones, tipos de datos
         Realiza verificaciones y validaciones, mostrando mensajes de error cuando es necesario.
-        Lee el archivo línea por línea, procesando cada línea para identificar y analizar elementos del programa.
-        Los elementos pueden ser variables, funciones o errores de sintaxis.
+        Lee el archivo línea por línea, procesando cada línea para identificar y analizar datos del programa.
+        Los datos pueden ser variables, funciones o errores de sintaxis.
         """
     def text_reader(self):
         nombre_funcion = ""
         palabra = ""
-        palabra2 = ""
+        palabra_aux = ""
         linea = ""
         contador = 0
-        bandera = 0
-        bandera2 = False
+        validacion = 0
+        validacion_aux = False
         contador_llaves = 0
         compilacion_correcta = 0
 
-        # ------------Datos elemento---------------
+        
         nombre = ""
         tipo = ""
         valor = ""
-        tipo_p = ""
-        id_p = ""
-
-        with open("codigos.txt") as entrada:
+        tipo_palabra = ""
+        key_palabra = ""
+ 
+        """
+        El archivo codigoCorrecto.txt o codigoIncorrecto.txt, se leeran línea por línea, por medio del read line
+        y se separan todas las palabras que se encuentran en la linea por medio del .split
+        También se eliminará los caracteres que no se toman para la validación, como lo son 
+        los "()" y el ";" 
+        Se cuenta con dos archivos .txt, en donde el mismo nombre menciona la funcionalidad 
+        al abrirlo con el analizador semántico
+        "codigoCorrecto.txt"    y   "codigoIncorrecto.txt"
+        """
+        with open("codigoIncorrecto.txt") as entrada:
             if entrada:
-                while bandera == 0:
-                    linea = entrada.readline()  # lee el archivo
+                while validacion == 0:
+                    linea = entrada.readline()
                     contador += 1
                     self.num_linea = contador
 
@@ -146,7 +161,7 @@ class Compilador:
                         if not palabra:
                             break
 
-                        if palabra != palabra2:
+                        if palabra != palabra_aux:
                             if palabra == "{":
                                 contador_llaves += 1
                             if palabra == "}":
@@ -159,9 +174,9 @@ class Compilador:
                                     if nombre == "" and palabra[0].isalpha():
                                         nombre = palabra
                                         if nombre[-1] == ';':
-                                            nombre = nombre[:-1]  # elimina el ; para crear el objeto
+                                            nombre = nombre[:-1]
                                         if palabra[-1] == ';':
-                                            palabra = palabra[:-1]  # elimina el ; para crear el objeto
+                                            palabra = palabra[:-1]
 
                                     if nombre != palabra:
                                         if nombre != "":
@@ -170,59 +185,58 @@ class Compilador:
                                                     palabra = palabra[:-1]
                                                 if not self.verifica_return(palabra, nombre_funcion):
                                                     print(
-                                                        f"Error-- la variable de retorno no es correcta conforme a la declaracion de la funcion '{nombre_funcion}'\n\n")
+                                                        f"Error-- Linea {self.num_linea}: valor de retorno no coincide con la declaración de la funcion'{nombre_funcion}'\n\n")
                                                     compilacion_correcta += 1
 
-                                            if tipo_p == "":
-                                                tipo_p = palabra
-                                                if tipo_p and tipo_p[0] == '(':
-                                                    tipo_p = tipo_p[1:]
+                                            if tipo_palabra == "":
+                                                tipo_palabra = palabra
+                                                if tipo_palabra and tipo_palabra[0] == '(':
+                                                    tipo_palabra = tipo_palabra[1:]
 
                                             else:
-                                                id_p = palabra
-                                                if id_p[-1] == ')' or id_p[-1] == ',':
-                                                    id_p = id_p[:-1]
+                                                key_palabra = palabra
+                                                if key_palabra[-1] == ')' or key_palabra[-1] == ',':
+                                                    key_palabra = key_palabra[:-1]
 
                                             valor = palabra
                                             if self.es_funcion(valor):
-                                                bandera2 = True
+                                                validacion_aux = True
 
-                                            if bandera2:
-                                                if id_p != "" and tipo_p != "":
-                                                    funcion = Dato("", tipo_p, id_p)
+                                            if validacion_aux:
+                                                if key_palabra != "" and tipo_palabra != "":
+                                                    funcion = Dato("", tipo_palabra, key_palabra)
                                                     if self.valor_tipo_correcto(funcion):
                                                         self.parametros.append(funcion)
                                                     else:
                                                         compilacion_correcta += 1
-                                                    tipo_p = ""
-                                                    id_p = ""
+                                                    tipo_palabra = ""
+                                                    key_palabra = ""
 
                                             else:
                                                 if valor and valor[-1] == ';':
                                                     valor = valor[:-1]
-                                                break  # elimina el ; para crear el objeto
+                                                break
 
-                            palabra2 = palabra
+                            palabra_aux = palabra
 
-                    bandera2 = False
+                    validacion_aux = False
                     palabra = ""
-                    palabra2 = ""
-                    tipo_p = ""
-                    id_p = ""
+                    palabra_aux = ""
+                    tipo_palabra = ""
+                    key_palabra = ""
 
                     if len(self.parametros) == 0:
-                        ele = Dato(valor, tipo, nombre)
-                        if not self.valor_tipo_correcto(ele):
-                            print("NO compila....\n\n")
+                        elemento = Dato(valor, tipo, nombre)
+                        if not self.valor_tipo_correcto(elemento):
+                            print("COMPILACION INTERRUMPIDA....\n\n")
                             compilacion_correcta += 1
 
                     else:
                         funcion = Dato(nombre, tipo, self.parametros)
                         nombre_funcion = nombre
-                        self.key_elemento.append(nombre)
+                        self.key_dato.append(nombre)
                         key = nombre
-                        registro = (key, funcion)
-                        self.hashtable_elemento[key] = funcion
+                        self.tabla_hash_dato[key] = funcion
 
                         self.parametros.clear()
 
@@ -231,14 +245,14 @@ class Compilador:
                     valor = ""
 
                     if not linea:
-                        bandera = 1  # verifica el final del archivo
+                        validacion = 1  # verifica el final del archivo
 
         if contador_llaves > 0:
-            print("Error-- se esperaba '}'")
+            print("Error-- Linea " +str(self.num_linea)+": se esperaba '}' ")
             compilacion_correcta += 1
 
         if contador_llaves < 0:
-            print("Error-- se esperaba '{'")
+            print("Error-- Linea " + str(self.num_linea) +": se esperaba '{' ")
             compilacion_correcta += 1
 
         if compilacion_correcta == 0:
@@ -249,12 +263,12 @@ class Compilador:
         Realiza verificaciones específicas para encontrar si son son correctos los tipos de datos y valores en el programa.
 
         Parámetros:
-        - elemento (Dato): El elemento a verificar.
+        - dato (Dato): El dato a verificar.
 
         Retorna:
         - bool: True si el tipo de dato y valor son correctos, False de lo contrario.
        
-        La función realiza diversas comprobaciones para garantizar que un elemento (variable o función) tenga un
+        La función realiza diversas comprobaciones para garantizar que un dato (variable o función) tenga un
         tipo de dato y valor coherentes. Verifica si las asignaciones y declaraciones son válidas, y maneja casos
         específicos como la declaración de variables con o sin tipo de dato, asignaciones de variables.
 
@@ -262,92 +276,91 @@ class Compilador:
 
    
         """
-    def valor_tipo_correcto(self, elemento):
-        if ((elemento.get_tipoDato() == "" and elemento.get_identificador() == "" and elemento.get_valor() == "")
-            or elemento.get_identificador() == "return" or elemento.get_tipoDato() == "void"
-            or (elemento.get_identificador() and elemento.get_identificador()[0] == 'i' and elemento.get_identificador()[1] == 'f')
-            or (elemento.get_identificador() and elemento.get_identificador()[0] == 'w' and elemento.get_identificador()[1] == 'h')
+    def valor_tipo_correcto(self, dato):
+        if ((dato.get_tipoDato() == "" and dato.get_key() == "" and dato.get_valor() == "")
+            or dato.get_key() == "return" or dato.get_tipoDato() == "void"
+            or (dato.get_key() and dato.get_key()[0] == 'i' and dato.get_key()[1] == 'f')
+            or (dato.get_key() and dato.get_key()[0] == 'w' and dato.get_key()[1] == 'h')
         ):
             return True
 
-        if elemento.get_identificador() != "":
-            if elemento.get_tipoDato() == "":  # no tiene tipo de dato
-                if self.verifica_llave(elemento):  # existe la llave
-                    if self.es_numero(elemento.get_valor()):  # es número y es acorde
-                        key = elemento.get_identificador()
+        if dato.get_key() != "":
+            if dato.get_tipoDato() == "":  # no tiene tipo de dato
+                if self.verifica_llave(dato):  # existe la llave
+                    if self.es_numero(dato.get_valor()):  # es número y es acorde
+                        key = dato.get_key()
 
-                        ele = self.busca_elemento_hash(key)
+                        elemento = self.buscar_dato_tablaHash(key)
 
-                        if ele[1].get_tipoDato() == "int" or ele[1].get_tipoDato() == "float":
-                            elemento.set_tipoDato(ele[1].get_tipoDato())
-                            self.hashtable_elemento.pop(key)
-                            self.hashtable_elemento[key] = elemento
-                            self.key_elemento.append(ele[1].get_identificador())
+                        if elemento[1].get_tipoDato() == "int" or elemento[1].get_tipoDato() == "float":
+                            dato.set_tipoDato(elemento[1].get_tipoDato())
+                            self.tabla_hash_dato.pop(key)
+                            self.tabla_hash_dato[key] = dato
+                            self.key_dato.append(elemento[1].get_key())
                             return True
                         else:
-                            print(f"Error-- Linea {self.num_linea}: el identificador '{elemento.get_identificador()}' no coincide con el valor de asignacion.")
+                            print(f"Error-- Linea {self.num_linea}: el identificador '{dato.get_key()}' no coincide con el valor de asignacion.")
                             return False
 
                     else:  # llave declarada y sin tipo de dato
-                        key = elemento.get_identificador()
+                        key = dato.get_key()
 
-                        ele = self.busca_elemento_hash(key)
+                        elemento = self.buscar_dato_tablaHash(key)
 
-                        if ((elemento.get_valor()[0] == '"' and elemento.get_valor()[-1] == '"') and ele[1].get_tipoDato() == "string"):  # es cadena y es acorde
-                            key = elemento.get_identificador()
-                            ele = self.busca_elemento_hash(key)
-                            elemento.set_tipoDato(ele[1].get_tipoDato())
-                            self.hashtable_elemento.pop(key)
-                            self.hashtable_elemento[key] = elemento
-                            self.key_elemento.append(elemento.get_identificador())
+                        if ((dato.get_valor()[0] == '"' and dato.get_valor()[-1] == '"') and elemento[1].get_tipoDato() == "string"):  # es cadena y es acorde
+                            key = dato.get_key()
+                            elemento = self.buscar_dato_tablaHash(key)
+                            dato.set_tipoDato(elemento[1].get_tipoDato())
+                            self.tabla_hash_dato.pop(key)
+                            self.tabla_hash_dato[key] = dato
+                            self.key_dato.append(dato.get_key())
                             return True
                         else:
-                            print(f"Error-- Linea {self.num_linea}: el identificador '{elemento.get_identificador()}' no coincide con el valor de asignacion.")
+                            print(f"Error-- Linea {self.num_linea}: el identificador '{dato.get_key()}' no coincide con el valor de asignacion.")
                             return False
                 else:
-                    print(f"Error-- Linea {self.num_linea}: '{elemento.get_identificador()}' no esta declarado.")
+                    print(f"Error-- Linea {self.num_linea}: '{dato.get_key()}' no esta declarado.")
                     return False
 
             else:  # tiene tipo de dato
-                if self.verifica_llave(elemento):  # Si existe
+                if self.verifica_llave(dato):  # Si existe
                     print(f"Error-- Linea {self.num_linea}: doble declaracion de variable.")
                     return False  # doble declaración, mal hecho
 
                 else:  # No existe la llave
-                    if elemento.get_valor() == "":  # No tiene valor
-                        key = elemento.get_identificador()
-                        registro = (key, elemento)
-                        self.hashtable_elemento[key] = elemento
-                        self.key_elemento.append(elemento.get_identificador())
+                    if dato.get_valor() == "":  # No tiene valor
+                        key = dato.get_key()
+                        self.tabla_hash_dato[key] = dato
+                        self.key_dato.append(dato.get_key())
                         return True
 
                     else:  # Si tiene valor
-                        if (self.es_numero(elemento.get_valor()) and (elemento.get_tipoDato() == "int" or elemento.get_tipoDato() == "float")):  # es número y es acorde
-                            key = elemento.get_identificador()
-                            self.hashtable_elemento.pop(key, None)
-                            self.hashtable_elemento[key] = elemento
-                            self.key_elemento.append(elemento.get_identificador())
+                        if (self.es_numero(dato.get_valor()) and (dato.get_tipoDato() == "int" or dato.get_tipoDato() == "float")):  # es número y es acorde
+                            key = dato.get_key()
+                            self.tabla_hash_dato.pop(key, None)
+                            self.tabla_hash_dato[key] = dato
+                            self.key_dato.append(dato.get_key())
                             return True
 
                         else:
                             if (
-                                (elemento.get_valor()[0] == '"' and elemento.get_valor()[-1] == '"')
-                                and elemento.get_tipoDato() == "string"
+                                (dato.get_valor()[0] == '"' and dato.get_valor()[-1] == '"')
+                                and dato.get_tipoDato() == "string"
                             ):  # declaración y definición correcta
-                                key = elemento.get_identificador()
-                                ele = self.busca_elemento_hash(key)
-                                elemento.set_tipoDato(ele.get_tipoDato())
-                                self.hashtable_elemento.pop(key)
-                                self.hashtable_elemento[key] = elemento
-                                self.key_elemento.append(elemento.get_identificador())
+                                key = dato.get_key()
+                                elemento = self.buscar_dato_tablaHash(key)
+                                dato.set_tipoDato(elemento.get_tipoDato())
+                                self.tabla_hash_dato.pop(key)
+                                self.tabla_hash_dato[key] = dato
+                                self.key_dato.append(dato.get_key())
                                 return True
                             else:
-                                print(f"Error-- Linea {self.num_linea}: el identificador '{elemento.get_identificador()}' no coincide con el valor de asignacion.")
+                                print(f"Error-- Linea {self.num_linea}: el identificador '{dato.get_key()}' no coincide con el valor de asignacion.")
                                 return False
         print(f"Error-- Linea {self.num_linea}: se esperaba identificador.")
         return False
 
-"""
+    """
         se crea la instancia del compilador
         se lee el archivo 
         """
