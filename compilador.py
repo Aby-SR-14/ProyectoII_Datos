@@ -3,20 +3,46 @@ from collections import defaultdict
 from dato import Dato
 
 class Compilador:
+
+    """
+        Se inicializa el objeto Compilador.
+
+        Atributos:
+        - hashtable_elemento (dict): Diccionario para almacenar elementos por key.
+        - key_elemento (list): Lista de llaves de elementos.
+        - parametros (list): Lista de parámetros de funciones.
+        - num_linea (int): Contador de líneas procesadas.
+        """
     def __init__(self):
         self.hashtable_elemento = {}
         self.key_elemento = []
         self.parametros = []
         self.num_linea = 0
 
+    """
+        Verifica si un elemento ya está presente en la lista de keys (key_elemento).
 
+        Parámetros:
+        - elemento (Dato): El elemento a verificar.
+
+        Retorna:
+        - bool: True si el elemento está presente, False de lo contrario.
+        """
     def verifica_llave(self, elemento):
         for v in self.key_elemento:
             if elemento.get_identificador() == v:
                 return True
         return False
 
+    """
+        Verifica si una cadena representa un número. Verificando asi si todos los componentes son digitos
 
+        Parámetros:
+        - x (str): La cadena a verificar.
+
+        Retorna:
+        - bool: True si la cadena es un número, False de lo contrario.
+        """
     def es_numero(self, x):
         if x[0] == '"':
             return False
@@ -27,18 +53,44 @@ class Compilador:
 
         return True
 
+    """
+        Verifica si una cadena representa el comienzo de una función.
 
+        Parámetros:
+        - x (str): La cadena a verificar.
+
+        Retorna:
+        - bool: True si la cadena representa el comienzo de una función, False de lo contrario.
+        """
     def es_funcion(self, x):
         if x and x[0] == '(':
             return True
         return False
 
+    """
+        Busca un elemento en el diccionario hashtable_elemento por su key.
 
+        Parámetros:
+        - key (str): La key del elemento a buscar.
+
+        Retorna:
+        - la key y el valor del elemento encontrado, o None si no se encuentra.
+        """
     def busca_elemento_hash(self, key):
         for registro in self.hashtable_elemento.items():
             if registro[1].get_identificador() == key:
                 return registro
 
+    """
+        Verifica si una variable de retorno coincide con la declaración de la función.
+
+        Parámetros:
+        - ret (str): La variable de retorno a verificar.
+        - nom_funcion (str): El nombre de la función.
+
+        Retorna:
+        - bool: True si la variable de retorno coincide con la declaración de la función, False si no es asi.
+        """
     def verifica_return(self, ret, nom_funcion):
         bandera_ret = False
         bandera_fun = False
@@ -55,7 +107,13 @@ class Compilador:
 
         return False
 
-    
+    """
+        Realiza la lectura y análisis del archivo de texto , procesando línea por línea.
+        Analiza las palabras en cada línea para identificar elementos como variables, funciones, tipos de datos
+        Realiza verificaciones y validaciones, mostrando mensajes de error cuando es necesario.
+        Lee el archivo línea por línea, procesando cada línea para identificar y analizar elementos del programa.
+        Los elementos pueden ser variables, funciones o errores de sintaxis.
+        """
     def text_reader(self):
         nombre_funcion = ""
         palabra = ""
@@ -187,6 +245,23 @@ class Compilador:
             print("Successful Compilation\n\n")
 
 
+    """
+        Realiza verificaciones específicas para encontrar si son son correctos los tipos de datos y valores en el programa.
+
+        Parámetros:
+        - elemento (Dato): El elemento a verificar.
+
+        Retorna:
+        - bool: True si el tipo de dato y valor son correctos, False de lo contrario.
+       
+        La función realiza diversas comprobaciones para garantizar que un elemento (variable o función) tenga un
+        tipo de dato y valor coherentes. Verifica si las asignaciones y declaraciones son válidas, y maneja casos
+        específicos como la declaración de variables con o sin tipo de dato, asignaciones de variables.
+
+        Si el tipo de dato y valor son correctos, devuelve True. En caso contrario, imprime mensajes de error y devuelve False.
+
+   
+        """
     def valor_tipo_correcto(self, elemento):
         if ((elemento.get_tipoDato() == "" and elemento.get_identificador() == "" and elemento.get_valor() == "")
             or elemento.get_identificador() == "return" or elemento.get_tipoDato() == "void"
@@ -272,5 +347,9 @@ class Compilador:
         print(f"Error-- Linea {self.num_linea}: se esperaba identificador.")
         return False
 
+"""
+        se crea la instancia del compilador
+        se lee el archivo 
+        """
 comp=Compilador()
 comp.text_reader()
